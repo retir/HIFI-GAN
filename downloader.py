@@ -3,17 +3,12 @@ import argparse
 import os
 
 FILE_IDS = {
-    "train.txt": "1-EdH0t0loc6vPiuVtXdhsDtzygWNSNZx",
-    "waveglow_256channels_ljs_v2.pt": "1WsibBTsuRg_SF2Z6L6NFRTT-NjEy1oTx",
-    "mel.tar.gz": "1cJKJTmYd905a-9GFoo5gKjzhKjUVj83j",
-    "alignments.zip": "1E32jmwdPenQIUcxhI4awBzbvrUD98Ksa",
-    "energies.zip": "1SJt6T0weTb_yx5N3KYFtnmkOBpJajkVu",
-    "LJSpeech.zip": "1qRnpmBWsY1x7V993O8BWBCmAadQTco1W",
-    "pitches.zip": "1UiG1zfLLTmLkqWmb5Fo16vjGnljgnObO"
+    "training.txt": "1SLot4nqFYth80UAG4lqRBH4eOWIDOTWO",
+    "validation.txt": "1DQXFbCZhBDwOwdQ8BWSjs_UkAer5l3SB"
 }
 
 PRETRAINED_IDS = {
-    "mfa_model.pth": "1vDI-9lck4FzsSfnT9a_bdsrkVH8GpsVE"
+    "checkpoint.pth": "1jThA-g1aDPqRUdG9BgwfWbCq61E5BZoJ"
 }
 
 
