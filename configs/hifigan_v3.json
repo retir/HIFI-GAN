@@ -1,0 +1,80 @@
+{
+    "name": "test",
+    "n_gpu": 1,
+    "data" : {
+        "data_path": "./data/LJSpeech-1.1/wavs/",
+        "train_split": "./data/LJSpeech-1.1/training.txt",
+        "val_split": "./data/LJSpeech-1.1/validation.txt",
+        "batch_size": 16
+    },
+    "dis_arch": {
+        "type": "HIFIDis",
+        "args": { 
+            "mpd_args": {},
+            "msd_args": {}
+        }
+    },
+    "gen_arch": {
+        "type": "HIFIGen",
+        "args": {
+            "resblock": "2",
+            "upsample_rates": [8,8,4],
+            "upsample_kernel_sizes": [16,16,8],
+            "upsample_initial_channel": 256,
+            "resblock_kernel_sizes": [3,5,7],
+            "resblock_dilation_sizes": [[1,2], [2,6], [3,12]]
+        }
+    },
+    "gen_optimizer": {
+        "type": "AdamW",
+        "args": {
+            "lr": 0.0002,
+            "betas": [0.8, 0.99]
+        }
+    },
+    "dis_optimizer": {
+        "type": "AdamW",
+        "args": {
+            "lr": 0.0002,
+            "betas": [0.8, 0.99]
+        }
+    },
+    "gen_scheduler": {
+        "type": "ExponentialLR",
+        "args": {
+            "gamma": 0.999,
+            "last_epoch": -1
+        }
+    },
+    "dis_scheduler": {
+        "type": "ExponentialLR",
+        "args": {
+            "gamma": 0.999,
+            "last_epoch": -1
+        }
+    },
+    "loss": {
+        "type": "HIFIGANLoss",
+        "args": {}
+    },
+    "logger": {
+        "type": "WanDBWriter",
+        "args": {
+            "logger_path": "./logger",
+            "save_step": 3000,
+            "log_step": 5,
+            "clear_Time": 20,
+            "wandb_project": "hifi-gan"
+        }
+    },
+    "trainer": {
+        "epochs": 600,
+        "save_dir": "saved/",
+        "save_period": 10,
+        "len_epoch": 800,
+        "grad_norm_clip": 1.0
+    },
+    "validation": {
+        "special_path": "./data/Special/"
+    }
+}
