@@ -68,13 +68,14 @@
         }
     },
     "trainer": {
-        "epochs": 600,
+        "epochs": 1000,
         "save_dir": "saved/",
-        "save_period": 10,
-        "len_epoch": 800,
+        "save_period": 5,
+        "len_epoch": 809,
         "grad_norm_clip": 1.0
     },
     "validation": {
-        "special_path": "./data/Special/"
+        "special_path": "./data/Special/",
+        "val_step": 5
     }
 }

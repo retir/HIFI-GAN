@@ -11,17 +11,15 @@ class HIFIGANLoss(nn.Module):
     
     def forward(self, batch, step):
         if step == 'D':
-            loss_disc_f, losses_disc_f_r, losses_disc_f_g = self.discriminator_loss(batch['y_df_hat_r'], batch['y_df_hat_g'])
-            loss_disc_s, losses_disc_s_r, losses_disc_s_g = self.discriminator_loss(batch['y_ds_hat_r'], batch['y_ds_hat_g'])
+            loss_disc_f, losses_disc_f_r, losses_disc_f_g = self.discriminator_loss(batch['real_preds_mpd'], batch['fake_preds_mpd'])
+            loss_disc_s, losses_disc_s_r, losses_disc_s_g = self.discriminator_loss(batch['real_preds_msd'], batch['fake_preds_msd'])
             return {'loss_disc_f': loss_disc_f, 'loss_disc_s': loss_disc_s}
         else:
-            #padded_mels = F.pad(batch['mels'], (0, batch['y_g_hat_mel'].size(-1) - batch['mels'].size(-1), 0, 0, 0, 0), mode='constant', value=-11.5129251)
-            loss_mel = F.l1_loss(batch['mels'], batch['y_g_hat_mel']) * 45
-            loss_fm_f = self.feature_loss(batch['fmap_f_r'], batch['fmap_f_g'])
-            loss_fm_s = self.feature_loss(batch['fmap_s_r'], batch['fmap_s_g'])
-            loss_gen_f, losses_gen_f = self.generator_loss(batch['y_df_hat_g'])
-            loss_gen_s, losses_gen_s = self.generator_loss(batch['y_ds_hat_g'])
-            #loss_gen_all = loss_gen_s + loss_gen_f + loss_fm_s + loss_fm_f + loss_mel
+            loss_mel = F.l1_loss(batch['mels'], batch['g_pred_mel']) * 45
+            loss_fm_f = self.feature_loss(batch['real_feats_mpd'], batch['fake_feats_mpd']) * 2
+            loss_fm_s = self.feature_loss(batch['real_feats_msd'], batch['fake_feats_msd']) * 2
+            loss_gen_f, losses_gen_f = self.generator_loss(batch['fake_preds_mpd'])
+            loss_gen_s, losses_gen_s = self.generator_loss(batch['fake_preds_msd'])
             return {'loss_gen_s': loss_gen_s, 'loss_gen_f': loss_gen_f, 'loss_fm_s': loss_fm_s, 'loss_fm_f': loss_fm_f, 'loss_mel': loss_mel}
 
             
@@ -30,8 +28,7 @@ class HIFIGANLoss(nn.Module):
         for dr, dg in zip(fmap_r, fmap_g):
             for rl, gl in zip(dr, dg):
                 loss += torch.mean(torch.abs(rl - gl))
-
-        return loss*2
+        return loss
     
     def discriminator_loss(self, disc_real_outputs, disc_generated_outputs):
         loss = 0

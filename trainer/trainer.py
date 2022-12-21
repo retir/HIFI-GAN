@@ -8,13 +8,10 @@ from scipy.io.wavfile import read
 
 from torch import nn
 from tqdm import tqdm
-from datasets.collate_fn import mel_transformer
+from datasets.mel_transformer import mel_transformer
+from utils.model_utils import toggle_grad
 import torch.nn.functional as F
 
-def toggle_grad(model, mode):
-    for param in model.parameters():
-        param.requires_grad = mode
-    return model
 
 class Trainer:
     def __init__(self, generator, 
@@ -141,8 +138,7 @@ class Trainer:
                 batch = self.prepare_batch(batch)
                 batch['mels'] = mel_transformer(batch['wavs'])
                 gen_out = self.gen(batch)
-                #padded_mels = F.pad(gen_out['mels'], (0, gen_out['y_g_hat_mel'].size(-1) - gen_out['mels'].size(-1), 0, 0, 0, 0), mode='constant', value=-11.5129251)
-                l1_error += F.l1_loss(gen_out['mels'], gen_out['y_g_hat_mel']).item()
+                l1_error += F.l1_loss(gen_out['mels'], gen_out['g_pred_mel']).item()
 
         l1_error /= len(self.val_loader)
         self.logger.add_scalar('l1_mel_loss', l1_error)
@@ -151,24 +147,12 @@ class Trainer:
         for i, path in enumerate(self.special_paths):
             sr, audio_wav = read(path)
             audio_wav = torch.FloatTensor(audio_wav)[None,:]
-            #print('VAL', torch.max(audio_wav), torch.min(audio_wav))
-            #audio_wav, sr = torchaudio.load(path)
             batch = mel_transformer(audio_wav.cuda())
             with torch.no_grad():
                 batch = batch.cuda()
-                #batch = self.prepare_batch(batch)
                 gen_out = self.gen({'mels': batch, 'wavs': audio_wav.cuda()})
-                #print(gen_out.shape)
-                #start_ind = 
-                self.logger.add_audio(f'val_{i}', gen_out['y_g_hat'].cpu()[0], 22050)
-                #print(gen_out['wavs'].shape)
+                self.logger.add_audio(f'val_{i}', gen_out['g_pred'].cpu()[0], 22050)
                 self.logger.add_audio(f'val_{i}_true', gen_out['wavs'].cpu()[0], 22050)
-                #print('OUT1', torch.max(gen_out['wavs'].cpu()[0]), torch.min(gen_out['wavs'].cpu()[0]))
-                #print('OUT2', torch.max(gen_out['y_g_hat'].cpu()[0]), torch.min(gen_out['y_g_hat'].cpu()[0]))
-                #print(audio_wav.cpu()[0].shape)
-            
-#         save_dir = str(self.checkpoint_dir) + "/results_" + str(self.current_step).zfill(7)
-#         os.makedirs(save_dir, exist_ok=True)
         
         print('End validating')
         self.gen.train()
@@ -214,12 +198,9 @@ class Trainer:
                 self.logger.add_scalar('total_D_loss', total_D_loss.item())
                 
                 if self.current_step % 500 == 0:
-                    audio = gen_out['y_g_hat'][0].detach().cpu().reshape(-1)
-                    #print('TRAIN2', torch.max(audio), torch.min(audio))
+                    audio = gen_out['g_pred'][0].detach().cpu().reshape(-1)
                     self.logger.add_audio(f'train_example', audio , 22050)
                     audio = gen_out['wavs'][1].detach().cpu().reshape(-1)
-                    #print('TRAIN', torch.max(audio), torch.min(audio))
-                    #print(audio.shape)
                     self.logger.add_audio(f'train_example_true', audio, 22050)
                 
                 
@@ -237,12 +218,6 @@ class Trainer:
                 total_G_loss.backward()
                 self.gen_optimizer.step()
                 self.logger.add_scalar('total_G_loss', total_G_loss.item())
-                #self.validate()
-                #assert 1 == 2
-
-#                 # Clipping gradients to avoid gradient explosion
-#                 nn.utils.clip_grad_norm_(
-#                     self.model.parameters(), self.config['trainer']['grad_norm_clip'])
 
             self.gen_scheduler.step()
             self.dis_scheduler.step()

@@ -7,9 +7,8 @@ from datasets.datasets import BaseDataset
 
 
 def get_dataloaders(config):
-    train_dataset = BaseDataset(config['data_path'], config['train_split'], None)
-    val_dataset = BaseDataset(config['data_path'], config['val_split'], None)
-
+    train_dataset = BaseDataset(config['data_path'], config['train_split'])
+    val_dataset = BaseDataset(config['data_path'], config['val_split'])
 
     training_loader = DataLoader(
         train_dataset,

@@ -17,7 +17,6 @@
     "gen_arch": {
         "type": "HIFIGen",
         "args": {
-            "resblock": "2",
             "upsample_rates": [8,8,2,2],
             "upsample_kernel_sizes": [16,16,4,4],
             "upsample_initial_channel": 512,
@@ -68,14 +67,13 @@
         }
     },
     "trainer": {
-        "epochs": 10,
+        "epochs": 1000,
         "save_dir": "saved/",
-        "save_period": 1,
-        "len_epoch": 809,
-        "grad_norm_clip": 1.0
+        "save_period": 5,
+        "len_epoch": 809
     },
     "validation": {
         "special_path": "./data/Special/",
-        "val_step": 1
+        "val_step": 5
     }
 }
