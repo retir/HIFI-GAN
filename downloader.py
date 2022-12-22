@@ -8,7 +8,7 @@ FILE_IDS = {
 }
 
 PRETRAINED_IDS = {
-    "checkpoint.pth": "1jThA-g1aDPqRUdG9BgwfWbCq61E5BZoJ"
+    "checkpoint.pth": "19ir-J80Uci7w09dyEI1JowPqItGDN2Js"
 }
 
 

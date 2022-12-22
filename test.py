@@ -34,6 +34,7 @@ def main(config, args):
     device, device_ids = prepare_device(config["n_gpu"])
     gen = config.init_obj(config["gen_arch"], module_arch)
     gen = gen.to(device)
+    transformer = mel_transformer.to(device)
     
     if len(device_ids) > 1:
         gen = torch.nn.DataParallel(gen, device_ids=device_ids)
@@ -42,7 +43,7 @@ def main(config, args):
     #assert checkpoint["config"]["gen_arch"] == config["gen_arch"]
     gen.load_state_dict(checkpoint["gen_state_dict"])
     gen.eval()
-    gen.remove_weight_norm() # ?
+    gen.remove_weight_norm()
     
     save_dir = args.results_dir
     os.makedirs(save_dir, exist_ok=True)
@@ -54,7 +55,7 @@ def main(config, args):
         audio_wav = torch.FloatTensor(audio_wav)[None,:]
         if torch.max(audio_wav) >= 1e3:
             audio_wav /= 32768.0
-        batch = mel_transformer(audio_wav.to(device))
+        batch = transformer(audio_wav.to(device))
         with torch.no_grad():
             batch = batch.to(device)
             gen_out = gen({'mels': batch, 'wavs': audio_wav.to(device)})
